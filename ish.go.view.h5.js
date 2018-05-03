@@ -11,13 +11,13 @@ Ish.Go.View = new function() {
 
 	// Static object for storing constants
 	var ViewConstants = new function() {
-		this.boardWidth = 19;
-		this.boardHeight = 19;
-		this.boardPadding = 6;
-		this.pieceWidth = 27;
-		this.pieceHeight = 27;
-		this.pixelWidth = 522;
-		this.pixelHeight = 522;
+		this.boardWidth = 7;
+		this.boardHeight = 7;
+		this.boardPadding = 20;
+		this.pieceWidth = 46;
+		this.pieceHeight = 46;
+		this.pixelWidth = 342;
+		this.pixelHeight = 342;
 		this.imgPieceBlack = "piece-black.png";
 		this.imgPieceWhite = "piece-white.png";
 		this.imgFlagBlack = "flag-black.png";
@@ -43,7 +43,7 @@ Ish.Go.View = new function() {
 		var coords = Ish.Go.View.getCanvasCoords(e);
 		var point = Ish.Go.View.getPoint(e);
 		
-		$("#coords").html("(" + coords.x + ", " + coords.y + ")");
+		//$("#coords").html("(" + coords.x + ", " + coords.y + ")");
 		
 		if (point) {
 			$("#point").html("(" + point.row + ", " + point.column + ")");
@@ -63,7 +63,7 @@ Ish.Go.View = new function() {
 		
 			canvas.width = ViewConstants.pixelWidth;
 			canvas.height = ViewConstants.pixelHeight;
-			canvas.style.background = "transparent url(board.png) no-repeat 0 0";
+			canvas.style.background = "transparent url(board_1.png) no-repeat 0 0";
 			
 			canvas.addEventListener("click", clickListener, false);
 			canvas.addEventListener("mousemove", mouseMoveListener);
@@ -270,7 +270,7 @@ Ish.Go.View = new function() {
 	 * Starts a new game.
 	 */
 	this.startNewGame = function() {
-		Ish.Go.Logic.newGame(19, 19);
+		Ish.Go.Logic.newGame(7, 7);
 		
 		this.redraw($("go-canvas"));
 	};
@@ -332,8 +332,8 @@ Ish.Go.View = new function() {
 	this.init = function() {
 		// Initialize game state
 		gGameState = new GameState(
-			19,
-			19,
+			7,
+			7,
 			new Player(Constants.Color.BLACK, Constants.PointState.BLACK),
 			new Player(Constants.Color.WHITE, Constants.PointState.WHITE)
 		);
