@@ -167,6 +167,7 @@ Ish.Go.View = new function() {
                         alertMsg += ":\n" + gGameState.moveError;
                     }
 
+
                     alert(alertMsg);
                     return;
                 }
@@ -278,7 +279,7 @@ Ish.Go.View = new function() {
 			
 			this.drawInfo();
         }
-    };m
+    };
     
     this.redraw = function(canvasElement) {
         // Create canvas and context if necessary
