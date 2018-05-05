@@ -352,7 +352,7 @@ Ish.Go.View = new function() {
   			Ish.Go.View.placePiece(respoint);
 		}
 		});
-	}
+	};
 	
 	this.init = function() {
 		// Initialize game state
@@ -365,7 +365,7 @@ Ish.Go.View = new function() {
 		
 		//start refresh
 		setInterval(gettingData,3000);
-		
+
 		this.redraw();
 	};
 	
