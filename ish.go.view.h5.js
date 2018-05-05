@@ -208,7 +208,7 @@ Ish.Go.View = new function() {
 			
 			this.drawInfo();
         }
-    };
+    };m
     
     this.redraw = function(canvasElement) {
         // Create canvas and context if necessary
