@@ -141,9 +141,21 @@ Ish.Go.View = new function() {
             return;
         }
 		
-		// Redraw board changes as a result of the move
+		// Redraw board changes as a result of the move and post the data to server
+		var passValue = {humanMove:moveResult.point, moveResult.player};
+
+		$.ajax({
+  		type: 'POST',
+  		url: "localhost:8000/game/next"
+  		data: passValue,
+  		dataType: 'json'
+		});
+		
 		this.update(moveResult);
 	};
+
+
+
 
 	/**
 	 * Draws piece on canvas
@@ -328,6 +340,19 @@ Ish.Go.View = new function() {
 		isBoardMarked ?	this.drawBoard() : this.drawMarkedBoard();
 		isBoardMarked = !isBoardMarked;
 	};
+
+	var gettingData = function(){
+		$.ajax({
+  		type: 'POST',
+  		url: "localhost:8000/game/next"
+  		dataType: 'json'
+  		success:function(res) {
+  			var resobj =  jQuery.parseJSON(res);
+  			var respoint = resobj.AlphaMove;
+  			Ish.Go.View.placePiece(respoint);
+		}
+		});
+	};
 	
 	this.init = function() {
 		// Initialize game state
@@ -338,6 +363,9 @@ Ish.Go.View = new function() {
 			new Player(Constants.Color.WHITE, Constants.PointState.WHITE)
 		);
 		
+		//start refresh
+		setInterval(gettingData,3000);
+
 		this.redraw();
 	};
 	
