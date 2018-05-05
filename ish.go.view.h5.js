@@ -341,6 +341,18 @@ Ish.Go.View = new function() {
 		isBoardMarked = !isBoardMarked;
 	};
 
+	var gettingData = function(){
+		$.ajax({
+  		type: 'POST',
+  		url: "localhost:8000/game/next"
+  		dataType: 'json'
+  		success:function(res) {
+  			var resobj =  jQuery.parseJSON(res);
+  			var respoint = resobj.AlphaMove;
+  			Ish.Go.View.placePiece(respoint);
+		}
+		});
+	}
 	
 	this.init = function() {
 		// Initialize game state
@@ -350,6 +362,9 @@ Ish.Go.View = new function() {
 			new Player(Constants.Color.BLACK, Constants.PointState.BLACK),
 			new Player(Constants.Color.WHITE, Constants.PointState.WHITE)
 		);
+		
+		//start refresh
+		setInterval(gettingData,3000);
 		
 		this.redraw();
 	};
