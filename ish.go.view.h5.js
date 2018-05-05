@@ -32,10 +32,17 @@ Ish.Go.View = new function() {
 
 	// Tracks clicks on the board (canvas)
 	var clickListener = function(e) {
-		var point = Ish.Go.View.getPoint(e);
-		if (point && !isBoardMarked) {
-			Ish.Go.View.placePiece(point);
-		}
+	    console.log("In clickListener! Current player is",gGameState.currentPlayer);
+	    if(gGameState.currentPlayer=='black'){
+            var point = Ish.Go.View.getPoint(e);
+            if (point && !isBoardMarked) {
+                Ish.Go.View.placePiece(point);
+                // Ish.Go.View.alphaPlacePiece(point);
+            }
+        }else{
+	        console.log("Current player is white, alpha, should let alpha play.")
+        }
+
 	};
 
 	// Tracks mouse movement over the board (canvas)
@@ -43,7 +50,7 @@ Ish.Go.View = new function() {
 		var coords = Ish.Go.View.getCanvasCoords(e);
 		var point = Ish.Go.View.getPoint(e);
 		
-		//$("#coords").html("(" + coords.x + ", " + coords.y + ")");
+		$("#coords").html("(" + coords.x + ", " + coords.y + ")");
 		
 		if (point) {
 			$("#point").html("(" + point.row + ", " + point.column + ")");
@@ -125,13 +132,68 @@ Ish.Go.View = new function() {
 	};
 
 	// Places piece, and draws changes on the board
+    this.alphaPlacePiece=function(humanPoint){
+        console.log(humanPoint);
+        var passValue = {
+            'humanMove':{'r':humanPoint.row, 'c':humanPoint.column}
+        };
+        console.log(passValue);
+
+        $.ajax({
+        type: 'POST',
+        url: "http://127.0.0.1:8000/game/next",
+        data: passValue,
+        success:function(data){
+                console.log(data);
+                m=data.AlphaMove;
+                var y=m[0];
+                var x=m[1];
+
+                var alphaPoint=new Point(
+                    y,	// row
+                    x
+                );
+
+                console.log(alphaPoint);
+
+                var moveResult = Ish.Go.Logic.move(alphaPoint.row, alphaPoint.column);
+
+                // Check for empty MoveResult (indicates invalid move)
+                if (!moveResult) {
+                    var alertMsg = "Invalid Move";
+                    // console.log(alertMsg+gGameState.currentPlayer);
+                    // Add specific message if present
+                    if (gGameState.moveError) {
+                        alertMsg += ":\n" + gGameState.moveError;
+                    }
+
+                    alert(alertMsg);
+                    return;
+                }
+                console.log(moveResult);
+
+                Ish.Go.View.update(moveResult);
+                console.log("Alpha Move updated, current player: "+gGameState.currentPlayer)
+            },
+        dataType: 'json',
+        });
+
+
+
+
+    };
+
 	this.placePiece = function(point) {
+
+		console.log("in this.placePiece! Current Player:"+gGameState.currentPlayer);
+        console.log(point);
+
         var moveResult = Ish.Go.Logic.move(point.row, point.column);
         
         // Check for empty MoveResult (indicates invalid move)
         if (!moveResult) {
 			var alertMsg = "Invalid Move";
-			
+			// console.log(alertMsg+gGameState.currentPlayer);
 			// Add specific message if present
 			if (gGameState.moveError) {
 				alertMsg += ":\n" + gGameState.moveError;
@@ -140,18 +202,14 @@ Ish.Go.View = new function() {
 			alert(alertMsg);
             return;
         }
-		
-		// Redraw board changes as a result of the move and post the data to server
-		var passValue = {humanMove:moveResult.point, moveResult.player};
+        console.log(moveResult);
 
-		$.ajax({
-  		type: 'POST',
-  		url: "localhost:8000/game/next"
-  		data: passValue,
-  		dataType: 'json'
-		});
-		
-		this.update(moveResult);
+        this.update(moveResult);
+        console.log("Move updated, current player: "+gGameState.currentPlayer);
+		// Redraw board changes as a result of the move and post the data to server
+
+        Ish.Go.View.alphaPlacePiece(point)
+
 	};
 
 
@@ -213,14 +271,14 @@ Ish.Go.View = new function() {
     };
     
     this.update = function(moveResult) {
-        if (moveResult) {
+        if (moveResult){
             // Draw only board changes
             this.drawPiece(moveResult.newPoint, moveResult.player.color);
             this.removePieces(moveResult.capturedPoints);
 			
 			this.drawInfo();
         }
-    };m
+    };
     
     this.redraw = function(canvasElement) {
         // Create canvas and context if necessary
@@ -263,7 +321,14 @@ Ish.Go.View = new function() {
 	
 	this.drawInfo = function() {
 		// Print turn
-		$("#turn").html("Current Turn: " + gGameState.currentPlayer.color);
+        var curTurnKind;
+        if(gGameState.currentPlayer=='black'){
+            curTurnKind='Human'
+        }else{
+            curTurnKind='Alpha'
+        }
+
+		$("#turn").html("Current Turn: "+ gGameState.currentPlayer.color+","+curTurnKind);
 		
 		// Print scores		
 		Ish.Go.Logic.setScores();
@@ -301,7 +366,7 @@ Ish.Go.View = new function() {
 		sBoard += "\tnew Player(Constants.Color.BLACK, Constants.PointState.BLACK),\n";
 		sBoard += "\tnew Player(Constants.Color.WHITE, Constants.PointState.WHITE)\n";
 		sBoard += ");\n";
-		
+
 		// Set current player
 		sBoard += "gGameState.currentPlayer = " +
 			(gGameState.currentPlayer == gGameState.player1 ?
@@ -344,8 +409,8 @@ Ish.Go.View = new function() {
 	var gettingData = function(){
 		$.ajax({
   		type: 'POST',
-  		url: "localhost:8000/game/next"
-  		dataType: 'json'
+  		url: "localhost:8000/game/next",
+  		dataType: 'json',
   		success:function(res) {
   			var resobj =  jQuery.parseJSON(res);
   			var respoint = resobj.AlphaMove;
@@ -364,7 +429,7 @@ Ish.Go.View = new function() {
 		);
 		
 		//start refresh
-		setInterval(gettingData,3000);
+		// setInterval(gettingData,3000);
 
 		this.redraw();
 	};
