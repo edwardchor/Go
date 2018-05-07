@@ -295,10 +295,11 @@ Ish.Go.Logic = new function() {
 	 * Sets the scores of both players in gGameState
 	 */
 	this.setScores = function() {
+	    var komi=1;
 		var markedBoard = this.getMarkedBoard();
 		var p1 = gGameState.player1;
 		var p2 = gGameState.player2;
-		
+		var justBoard=gGameState.getBoardCopy();
 		// Reset scores
 		p1.score = 0;
 		p2.score = 0;
@@ -306,8 +307,8 @@ Ish.Go.Logic = new function() {
 		// Scan marked board and distribute points
 		for (var y = 0; y < gGameState.boardHeight; y++) {
 			for (var x = 0; x < gGameState.boardWidth; x++) {
-				var pState = markedBoard[y][x];
-				
+				// var pState = markedBoard[y][x];
+				var pState=justBoard[y][x];
 				if (pState == p1.pointState) {
 					p1.score++;
 				}
@@ -316,6 +317,7 @@ Ish.Go.Logic = new function() {
 				}
 			}
 		}
+	    p2.score+=komi;
 	};
 	
 	/**
@@ -328,6 +330,21 @@ Ish.Go.Logic = new function() {
 			new Player(Constants.Color.BLACK, Constants.PointState.BLACK),
 			new Player(Constants.Color.WHITE, Constants.PointState.WHITE)
 		);
+
+        var passValue = {
+            'init':true
+        };
+        $.ajax({
+            type: 'POST',
+            url: "http://deeplearning.edwardchor.com:8000/game/init/",
+            data: passValue,
+            success:function(data){
+                console.log("init done")
+                console.log(data)
+
+            },
+            dataType: 'json',
+        });
 	}
 	
 }; // end Ish.Go.Logic namespace

@@ -139,13 +139,19 @@ Ish.Go.View = new function() {
         };
         console.log(passValue);
 
-        $.ajax({
-        type: 'POST',
-        url: "http://127.0.0.1:8000/game/next",
-        data: passValue,
-        success:function(data){
+        var getAlphaMove={
+            type: 'POST',
+            url: "http://deeplearning.edwardchor.com:8000/game/next/",
+            data: passValue,
+            timeout: 300000,
+            success:function(data){
                 console.log(data);
                 m=data.AlphaMove;
+                if(!m){
+                    console.log("Game Over, Winner:", data.result);
+                    alert(data.result,"Win!");
+                    return
+                }
                 var y=m[0];
                 var x=m[1];
 
@@ -175,9 +181,75 @@ Ish.Go.View = new function() {
 
                 Ish.Go.View.update(moveResult);
                 console.log("Alpha Move updated, current player: "+gGameState.currentPlayer)
+
             },
-        dataType: 'json',
-        });
+            error:function(e){
+                $.ajax(getAlphaMove)
+            },
+            complete:function(data){
+                console.log("completed!");
+
+            },
+            dataType: 'json',
+        };
+
+        $.ajax(getAlphaMove)
+        //
+        // $.ajax({
+        // type: 'POST',
+        // url: "http://deeplearning.edwardchor.com:8000/game/next/",
+        // data: passValue,
+        // timeout: 300000,
+        // success:function(data){
+        //     console.log(data);
+        //     m=data.AlphaMove;
+        //     if(!m){
+        //         console.log("Game Over, Winner:", data.result);
+        //         alert(data.result,"Win!");
+        //         return
+        //     }
+        //     var y=m[0];
+        //     var x=m[1];
+        //
+        //     var alphaPoint=new Point(
+        //         y,	// row
+        //         x
+        //     );
+        //
+        //     console.log(alphaPoint);
+        //
+        //     var moveResult = Ish.Go.Logic.move(alphaPoint.row, alphaPoint.column);
+        //
+        //     // Check for empty MoveResult (indicates invalid move)
+        //     if (!moveResult) {
+        //         var alertMsg = "Invalid Move";
+        //         // console.log(alertMsg+gGameState.currentPlayer);
+        //         // Add specific message if present
+        //         if (gGameState.moveError) {
+        //             alertMsg += ":\n" + gGameState.moveError;
+        //         }
+        //
+        //
+        //         alert(alertMsg);
+        //         return;
+        //     }
+        //     console.log(moveResult);
+        //
+        //     Ish.Go.View.update(moveResult);
+        //     console.log("Alpha Move updated, current player: "+gGameState.currentPlayer)
+        //
+        //     },
+        //     error:function(e){
+        //
+        //     },
+        //     complete:function(data){
+        //         console.log("completed!");
+        //
+        //     },
+        // dataType: 'json',
+        // }).done(function(data){
+        //     console.log("done data:",data)
+        // });
 
 
 
@@ -349,7 +421,6 @@ Ish.Go.View = new function() {
 	 */
 	this.startNewGame = function() {
 		Ish.Go.Logic.newGame(7, 7);
-		
 		this.redraw($("go-canvas"));
 	};
 
@@ -410,7 +481,7 @@ Ish.Go.View = new function() {
 	var gettingData = function(){
 		$.ajax({
   		type: 'POST',
-  		url: "localhost:8000/game/next",
+  		url: "http://deeplearning.edwardchor.com:8000/game/next/",
   		dataType: 'json',
   		success:function(res) {
   			var resobj =  jQuery.parseJSON(res);
@@ -431,6 +502,21 @@ Ish.Go.View = new function() {
 		
 		//start refresh
 		// setInterval(gettingData,3000);
+
+        var passValue = {
+            'init':true
+        };
+        $.ajax({
+            type: 'POST',
+            url: "http://deeplearning.edwardchor.com:8000/game/init/",
+            data: passValue,
+            success:function(data){
+            console.log("init done")
+            console.log(data)
+
+            },
+            dataType: 'json',
+        });
 
 		this.redraw();
 	};
